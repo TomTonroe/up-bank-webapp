@@ -1,5 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingDown, TrendingUp, Receipt } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatsCardsProps {
   totalBalance: number;
@@ -18,55 +19,78 @@ export function StatsCards({
   thisMonthIncome,
   totalTransactions,
 }: StatsCardsProps) {
+  const statCards = [
+    {
+      key: 'total-balance',
+      title: 'Total Balance',
+      value: formatCurrency(totalBalance),
+      description: 'Across all accounts',
+      icon: DollarSign,
+      iconClass: 'bg-indigo-400/15 text-indigo-100',
+      valueClass: 'text-foreground',
+    },
+    {
+      key: 'spending',
+      title: 'This Month Spending',
+      value: formatCurrency(thisMonthSpending),
+      description: 'Expenses this month',
+      icon: TrendingDown,
+      iconClass: 'bg-rose-400/15 text-rose-100',
+      valueClass: 'text-rose-200',
+    },
+    {
+      key: 'income',
+      title: 'This Month Income',
+      value: formatCurrency(thisMonthIncome),
+      description: 'Inbound cashflow this month',
+      icon: TrendingUp,
+      iconClass: 'bg-emerald-400/15 text-emerald-100',
+      valueClass: 'text-emerald-200',
+    },
+    {
+      key: 'transactions',
+      title: 'Transactions',
+      value: totalTransactions.toString(),
+      description: 'Transactions recorded this month',
+      icon: Receipt,
+      iconClass: 'bg-sky-400/15 text-sky-100',
+      valueClass: 'text-sky-100',
+    },
+  ];
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
-          <p className="text-xs text-muted-foreground">Across all accounts</p>
-        </CardContent>
-      </Card>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {statCards.map((card) => {
+        const Icon = card.icon;
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">This Month Spending</CardTitle>
-          <TrendingDown className="h-4 w-4 text-destructive" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-destructive">
-            {formatCurrency(thisMonthSpending)}
-          </div>
-          <p className="text-xs text-muted-foreground">Expenses this month</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">This Month Income</CardTitle>
-          <TrendingUp className="h-4 w-4 text-success" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-success">
-            {formatCurrency(thisMonthIncome)}
-          </div>
-          <p className="text-xs text-muted-foreground">Income this month</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-          <Receipt className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalTransactions}</div>
-          <p className="text-xs text-muted-foreground">This month</p>
-        </CardContent>
-      </Card>
+        return (
+          <Card key={card.key} className="relative h-full">
+            <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-sm font-semibold tracking-wide uppercase text-muted-foreground/70">
+                  {card.title}
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground/70">
+                  {card.description}
+                </CardDescription>
+              </div>
+              <span
+                className={cn(
+                  'flex size-10 items-center justify-center rounded-xl border border-white/10 backdrop-blur-md transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-[1.03]',
+                  card.iconClass
+                )}
+              >
+                <Icon className="size-5" />
+              </span>
+            </CardHeader>
+            <CardContent>
+              <p className={cn('text-3xl font-semibold tracking-tight drop-shadow-[0_0_8px_rgba(15,23,42,0.35)]', card.valueClass)}>
+                {card.value}
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

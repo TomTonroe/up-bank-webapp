@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, TooltipProps } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { TimeRangeSelector, getDaysFromTimeRange } from './TimeRangeSelector';
 import { TimeRange } from '@/lib/types/analytics';
@@ -44,8 +44,16 @@ export function BalanceTimeline({ data, currentTotalBalance, defaultRange = '30d
     };
   });
 
+  type BalancePoint = {
+    date: string;
+    income: number;
+    expenses: number;
+    balance: number;
+    transactionCount: number;
+  };
+
   // Reverse back to chronological order
-  const chartData = balanceHistory.reverse();
+  const chartData: BalancePoint[] = balanceHistory.reverse();
 
   // Determine appropriate tick interval and format based on data range
   const getTickInterval = () => {
@@ -68,9 +76,13 @@ export function BalanceTimeline({ data, currentTotalBalance, defaultRange = '30d
     return format(parsedDate, 'MMM yy'); // "Jan 24"
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0]?.payload as BalancePoint | undefined;
+
+      if (!data) {
+        return null;
+      }
       return (
         <div className="rounded-lg border bg-card p-3 shadow-md">
           <p className="text-sm font-medium mb-2">
@@ -131,17 +143,25 @@ export function BalanceTimeline({ data, currentTotalBalance, defaultRange = '30d
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={CHART_COLORS.balance} stopOpacity={0.3} />
+                <stop offset="5%" stopColor={CHART_COLORS.balance} stopOpacity={0.4} />
                 <stop offset="95%" stopColor={CHART_COLORS.balance} stopOpacity={0} />
               </linearGradient>
+              <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={CHART_COLORS.income} stopOpacity={0.35} />
+                <stop offset="95%" stopColor={CHART_COLORS.income} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={CHART_COLORS.expenses} stopOpacity={0.35} />
+                <stop offset="95%" stopColor={CHART_COLORS.expenses} stopOpacity={0} />
+              </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.15)" />
             <XAxis
               dataKey="date"
               tickFormatter={getTickFormat}
               interval={getTickInterval()}
-              stroke="hsl(var(--muted-foreground))"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              stroke="rgba(148,163,184,0.6)"
+              tick={{ fill: 'rgba(148,163,184,0.7)' }}
               fontSize={12}
               angle={chartData.length > 90 ? -45 : 0}
               textAnchor={chartData.length > 90 ? 'end' : 'middle'}
@@ -149,12 +169,28 @@ export function BalanceTimeline({ data, currentTotalBalance, defaultRange = '30d
             />
             <YAxis
               tickFormatter={(value) => `$${value.toFixed(0)}`}
-              stroke="hsl(var(--muted-foreground))"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              stroke="rgba(148,163,184,0.6)"
+              tick={{ fill: 'rgba(148,163,184,0.7)' }}
               fontSize={12}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '14px', color: 'hsl(var(--muted-foreground))' }} iconType="line" />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(129,140,248,0.35)', strokeWidth: 1 }} />
+            <Legend wrapperStyle={{ fontSize: '13px', color: 'rgba(148,163,184,0.8)' }} iconType="line" />
+            <Area
+              type="monotone"
+              dataKey="income"
+              stroke={CHART_COLORS.income}
+              strokeWidth={2}
+              fill="url(#incomeGradient)"
+              name="Income"
+            />
+            <Area
+              type="monotone"
+              dataKey="expenses"
+              stroke={CHART_COLORS.expenses}
+              strokeWidth={2}
+              fill="url(#expenseGradient)"
+              name="Expenses"
+            />
             <Area
               type="monotone"
               dataKey="balance"

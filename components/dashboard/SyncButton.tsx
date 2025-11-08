@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { RefreshCcw, Sparkles } from 'lucide-react';
 
 export function SyncButton() {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -35,15 +37,27 @@ export function SyncButton() {
   return (
     <div className="flex items-center gap-3">
       {message && (
-        <span className="text-sm text-muted-foreground">{message}</span>
+        <span className="text-xs text-muted-foreground/80">{message}</span>
       )}
-      <button
+      <Button
         onClick={handleSync}
         disabled={isSyncing}
-        className="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        size="sm"
+        className="shadow-[0_18px_40px_-20px_rgba(99,102,241,0.7)] disabled:translate-y-0"
+        aria-busy={isSyncing}
       >
-        {isSyncing ? 'Syncing...' : 'Sync Now'}
-      </button>
+        {isSyncing ? (
+          <span className="inline-flex items-center gap-2">
+            <RefreshCcw className="size-4 animate-spin" />
+            Syncing...
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-2">
+            <Sparkles className="size-4" />
+            Sync Now
+          </span>
+        )}
+      </Button>
     </div>
   );
 }

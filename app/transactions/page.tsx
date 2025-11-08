@@ -11,13 +11,15 @@ export default function TransactionsPage() {
   const syncStatus = getSyncStatus();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen bg-transparent">
       <DashboardHeader syncStatus={syncStatus} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">All Transactions</h1>
-          <p className="text-muted-foreground mt-1">
+      <main className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            All Transactions
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground/75">
             {transactions.length} total transactions
           </p>
         </div>

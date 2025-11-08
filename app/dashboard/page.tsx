@@ -20,7 +20,9 @@ import { TopMerchants } from '@/components/analytics/TopMerchants';
 import { AccountDistribution } from '@/components/analytics/AccountDistribution';
 import { TransactionVelocity } from '@/components/analytics/TransactionVelocity';
 import { CategoryTrends } from '@/components/analytics/CategoryTrends';
+import { WeeklySpendingPulse } from '@/components/analytics/WeeklySpendingPulse';
 import { InitialSyncPrompt } from '@/components/setup/InitialSyncPrompt';
+import { SpendingInsights } from '@/components/dashboard/SpendingInsights';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,11 +69,11 @@ export default function DashboardPage() {
   const categoryTrendsData = getCategoryTrends(null); // Get all category trend data
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen bg-transparent">
       <DashboardHeader syncStatus={syncStatus} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+      <main className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="space-y-10">
           {/* Stats Cards */}
           <StatsCards
             totalBalance={totalBalance}
@@ -92,13 +94,19 @@ export default function DashboardPage() {
             <TopMerchants data={topMerchantsData} />
           </div>
 
-          {/* Analytics Charts - Row 3 (Phase 2) */}
+          {/* Analytics Snapshot Row */}
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[2fr_1fr]">
+            <WeeklySpendingPulse transactions={allTransactions} />
+            <SpendingInsights transactions={allTransactions} />
+          </div>
+
+          {/* Analytics Charts - Row 3 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <AccountDistribution accounts={accounts} />
             <TransactionVelocity data={velocityData} />
           </div>
 
-          {/* Analytics Charts - Row 4 (Phase 2) */}
+          {/* Analytics Charts - Row 4 */}
           <div className="grid grid-cols-1 gap-6">
             <CategoryTrends data={categoryTrendsData} />
           </div>

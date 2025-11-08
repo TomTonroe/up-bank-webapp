@@ -6,37 +6,37 @@
   --radius: 0.5rem;
 
   /* Base - Dark mode only */
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  --background: 230 35% 7%;
+  --foreground: 210 36% 96%;
 
   /* Surfaces */
-  --card: 222 47% 13%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 13%;
-  --popover-foreground: 210 40% 98%;
+  --card: 230 32% 12%;
+  --card-foreground: 210 36% 96%;
+  --popover: 230 32% 12%;
+  --popover-foreground: 210 36% 96%;
 
   /* Muted */
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 227 29% 18%;
+  --muted-foreground: 215 18% 70%;
 
   /* Brand & Accents */
-  --primary: 217 91% 60%; /* blue-500 */
-  --primary-foreground: 222 47% 11%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
-  --success: 142 70% 58%;
-  --success-foreground: 222 47% 11%;
-  --info: 199 89% 48%;
-  --info-foreground: 222 47% 11%;
-  --destructive: 0 72% 50%;
-  --destructive-foreground: 210 40% 98%;
+  --primary: 266 83% 62%;
+  --primary-foreground: 250 76% 98%;
+  --secondary: 196 87% 52%;
+  --secondary-foreground: 210 36% 98%;
+  --accent: 217 92% 60%;
+  --accent-foreground: 230 35% 8%;
+  --success: 146 65% 56%;
+  --success-foreground: 230 35% 8%;
+  --info: 199 88% 60%;
+  --info-foreground: 230 35% 8%;
+  --destructive: 0 78% 58%;
+  --destructive-foreground: 210 36% 96%;
 
   /* Borders & Inputs */
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 217 91% 60%;
+  --border: 226 34% 20%;
+  --input: 226 34% 23%;
+  --ring: 266 83% 62%;
 }
 
 @layer base {
@@ -46,6 +46,12 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    background-image:
+      radial-gradient(130% 100% at 15% 15%, hsl(var(--primary) / 0.18), transparent),
+      radial-gradient(120% 90% at 85% 10%, hsl(var(--secondary) / 0.18), transparent),
+      radial-gradient(100% 120% at 50% 95%, hsl(var(--accent) / 0.12), transparent);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 }
 

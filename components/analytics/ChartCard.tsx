@@ -10,15 +10,21 @@ interface ChartCardProps {
 
 export function ChartCard({ title, description, action, children }: ChartCardProps) {
   return (
-    <Card>
-      <CardHeader className="gap-1">
-        <CardTitle className="text-base font-semibold">{title}</CardTitle>
-        {description ? (
-          <CardDescription>{description}</CardDescription>
-        ) : null}
-        {action ? <div className="mt-3">{action}</div> : null}
+    <Card className="h-full">
+      <CardHeader className="relative z-10 flex flex-wrap items-start justify-between gap-3 pb-0">
+        <div className="space-y-1">
+          <CardTitle className="text-base font-semibold tracking-tight text-foreground">
+            {title}
+          </CardTitle>
+          {description ? (
+            <CardDescription className="text-sm text-muted-foreground/70">
+              {description}
+            </CardDescription>
+          ) : null}
+        </div>
+        {action ? <div className="mt-1">{action}</div> : null}
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="relative z-10 pt-5">{children}</CardContent>
     </Card>
   );
 }

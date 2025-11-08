@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { TimeRangeSelector, getDaysFromTimeRange } from './TimeRangeSelector';
 import { TimeRange } from '@/lib/types/analytics';
@@ -14,11 +14,18 @@ interface TopMerchantsProps {
   defaultRange?: TimeRange;
 }
 
+type MerchantDatum = {
+  merchant: string;
+  amount: number;
+  transactionCount: number;
+  averageTransaction: number;
+};
+
 export function TopMerchants({ data, defaultRange = '30d' }: TopMerchantsProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>(defaultRange);
 
   // Filter and aggregate data based on time range
-  const chartData = useMemo(() => {
+  const chartData: MerchantDatum[] = useMemo(() => {
     const days = getDaysFromTimeRange(timeRange);
     const cutoffDate = days ? subDays(new Date(), days) : null;
 
@@ -38,15 +45,15 @@ export function TopMerchants({ data, defaultRange = '30d' }: TopMerchantsProps) 
     });
 
     // Convert to chart format and get top 10
-    return Array.from(merchantMap.entries())
+    const dataset: MerchantDatum[] = Array.from(merchantMap.entries())
       .map(([merchant, { amount, count }]) => ({
         merchant,
         amount: amount / 100,
         transactionCount: count,
         averageTransaction: amount / count / 100,
-      }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 10);
+      }));
+
+    return dataset.sort((a, b) => b.amount - a.amount).slice(0, 10);
   }, [data, timeRange]);
 
   // Truncate long merchant names
@@ -55,30 +62,36 @@ export function TopMerchants({ data, defaultRange = '30d' }: TopMerchantsProps) 
     return name.substring(0, maxLength) + '...';
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="rounded-lg border bg-card p-3 shadow-md max-w-xs">
-          <p className="text-sm font-semibold mb-2 break-words">{data.merchant}</p>
-          <div className="space-y-1 text-sm">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Total Spent:</span>
-              <span className="font-medium">{formatCurrency(data.amount * 100)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Transactions:</span>
-              <span className="font-medium">{data.transactionCount}</span>
-            </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">Average:</span>
-              <span className="font-medium">{formatCurrency(data.averageTransaction * 100)}</span>
-            </div>
+  const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+    if (!active || !payload || !payload.length) {
+      return null;
+    }
+
+    const datum = payload[0]?.payload as MerchantDatum | undefined;
+
+    if (!datum) {
+      return null;
+    }
+
+    return (
+      <div className="max-w-xs rounded-lg border bg-card p-3 shadow-md">
+        <p className="mb-2 break-words text-sm font-semibold">{datum.merchant}</p>
+        <div className="space-y-1 text-sm">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">Total Spent:</span>
+            <span className="font-medium">{formatCurrency(datum.amount * 100)}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">Transactions:</span>
+            <span className="font-medium">{datum.transactionCount}</span>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-muted-foreground">Average:</span>
+            <span className="font-medium">{formatCurrency(datum.averageTransaction * 100)}</span>
           </div>
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   };
 
   return (
@@ -99,27 +112,34 @@ export function TopMerchants({ data, defaultRange = '30d' }: TopMerchantsProps) 
               layout="vertical"
               margin={{ top: 10, right: 10, left: 100, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <defs>
+                <linearGradient id="merchantBar" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor={CHART_COLORS.expenses} stopOpacity={0.3} />
+                  <stop offset="50%" stopColor={CHART_COLORS.expenses} stopOpacity={0.65} />
+                  <stop offset="100%" stopColor={CHART_COLORS.balance} stopOpacity={0.9} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.15)" />
               <XAxis
                 type="number"
                 tickFormatter={(value) => `$${value.toFixed(0)}`}
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                stroke="rgba(148,163,184,0.6)"
+                tick={{ fill: 'rgba(148,163,184,0.7)' }}
                 fontSize={12}
               />
               <YAxis
                 type="category"
                 dataKey="merchant"
                 tickFormatter={(value) => truncateName(value, 20)}
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                stroke="rgba(148,163,184,0.6)"
+                tick={{ fill: 'rgba(148,163,184,0.8)' }}
                 fontSize={12}
                 width={90}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(129,140,248,0.08)' }} />
               <Bar
                 dataKey="amount"
-                fill={CHART_COLORS.expenses}
+                fill="url(#merchantBar)"
                 radius={[0, 4, 4, 0]}
               />
             </BarChart>
@@ -130,10 +150,10 @@ export function TopMerchants({ data, defaultRange = '30d' }: TopMerchantsProps) 
             {chartData.slice(0, 5).map((item, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between gap-2 p-2 rounded hover:bg-muted transition-colors"
+                className="flex items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/5 p-2 transition-all duration-200 hover:border-white/15 hover:bg-white/10"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-xs font-medium">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/10 text-xs font-semibold text-foreground/80">
                     {index + 1}
                   </div>
                   <div className="min-w-0">

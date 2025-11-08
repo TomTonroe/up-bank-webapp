@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DbTransaction, DbAccount, DbCategory } from '@/lib/types/database';
 import { formatCurrency } from '@/lib/utils/chart-colors';
 import { format } from 'date-fns';
 import { exportTransactionsToCsv } from '@/lib/utils/export';
 import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface TransactionListProps {
   transactions: DbTransaction[];
@@ -20,6 +24,8 @@ export function TransactionList({ transactions, accounts, categories }: Transact
   const [selectedType, setSelectedType] = useState<'all' | 'income' | 'expense'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
+  const selectClassName =
+    'w-full rounded-lg border border-white/10 bg-background/60 px-3 py-2 text-sm text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35';
 
   // Filter transactions
   const filteredTransactions = useMemo(() => {
@@ -57,7 +63,7 @@ export function TransactionList({ transactions, accounts, categories }: Transact
   const paginatedTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
 
   // Reset to page 1 when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedAccount, selectedCategory, selectedType]);
 
@@ -74,45 +80,50 @@ export function TransactionList({ transactions, accounts, categories }: Transact
   return (
     <div className="space-y-6">
       {/* Header with Export Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Transactions</h2>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Transactions</h2>
+          <p className="mt-1 text-sm text-muted-foreground/75">
             {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
+        <Button
           onClick={handleExport}
           disabled={filteredTransactions.length === 0}
-          className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          size="sm"
+          className="self-start shadow-[0_18px_40px_-20px_rgba(129,140,248,0.55)] disabled:shadow-none"
         >
-          <Download className="h-4 w-4" />
-          Export to CSV
-        </button>
+          <Download className="size-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Filters */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Search */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Search</label>
-            <input
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Search
+            </label>
+            <Input
               type="text"
               placeholder="Search transactions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm"
+              className="h-10 rounded-lg border-white/10 bg-background/60 text-sm placeholder:text-muted-foreground/50 focus-visible:border-primary/40 focus-visible:ring-primary/35"
             />
           </div>
 
           {/* Account filter */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Account</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Account
+            </label>
             <select
               value={selectedAccount}
               onChange={(e) => setSelectedAccount(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm"
+              className={selectClassName}
             >
               <option value="all">All Accounts</option>
               {accounts.map((account) => (
@@ -125,11 +136,13 @@ export function TransactionList({ transactions, accounts, categories }: Transact
 
           {/* Category filter */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Category</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Category
+            </label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm"
+              className={selectClassName}
             >
               <option value="all">All Categories</option>
               {categories.map((category) => (
@@ -143,11 +156,13 @@ export function TransactionList({ transactions, accounts, categories }: Transact
 
           {/* Type filter */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Type</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Type
+            </label>
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as 'all' | 'income' | 'expense')}
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm"
+              className={selectClassName}
             >
               <option value="all">All Types</option>
               <option value="income">Income</option>
@@ -157,74 +172,83 @@ export function TransactionList({ transactions, accounts, categories }: Transact
         </div>
 
         {/* Filter summary */}
-        <div className="mt-4 pt-4 border-t flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
+        <div className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-4 text-sm text-muted-foreground/75 sm:flex-row sm:items-center sm:justify-between">
+          <span>
             Showing {paginatedTransactions.length} of {filteredTransactions.length} transactions
           </span>
           {(searchTerm || selectedAccount !== 'all' || selectedCategory !== 'all' || selectedType !== 'all') && (
-            <button
+            <Button
               onClick={() => {
                 setSearchTerm('');
                 setSelectedAccount('all');
                 setSelectedCategory('all');
                 setSelectedType('all');
               }}
-              className="text-primary hover:underline"
+              variant="ghost"
+              size="sm"
+              className="self-start text-primary hover:text-primary/80"
             >
               Clear filters
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {/* Transaction list */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+      <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
         <div className="p-6">
           {paginatedTransactions.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">
+            <p className="py-12 text-center text-sm text-muted-foreground/75">
               No transactions found matching your filters
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {paginatedTransactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-4 rounded-lg hover:bg-muted transition-colors"
+                  className="group flex items-start justify-between gap-6 rounded-xl border border-white/5 bg-white/5 px-4 py-4 transition-all duration-200 hover:border-white/15 hover:bg-white/10"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{tx.description}</p>
-                    <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium tracking-wide text-foreground">
+                      {tx.description}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground/70">
                       <span>{format(new Date(tx.created_at), 'MMM d, yyyy h:mm a')}</span>
-                      <span>•</span>
+                      <span className="text-muted-foreground/40">•</span>
                       <span>{getAccountName(tx.account_id)}</span>
                       {tx.category_name && (
                         <>
-                          <span>•</span>
-                          <span className="px-2 py-0.5 rounded-full bg-muted text-xs">
+                          <span className="text-muted-foreground/40">•</span>
+                          <Badge className="border-white/20 bg-white/10 text-[10px] font-semibold uppercase tracking-wide">
                             {tx.category_name}
-                          </span>
+                          </Badge>
                         </>
                       )}
                       {tx.message && (
                         <>
-                          <span>•</span>
-                          <span className="italic">{tx.message}</span>
+                          <span className="text-muted-foreground/40">•</span>
+                          <span className="italic text-muted-foreground/60">{tx.message}</span>
                         </>
                       )}
                     </div>
                   </div>
-                  <div className="text-right ml-4">
+                  <div className="ml-4 text-right">
                     <p
-                      className={`font-semibold text-lg ${
-                        tx.amount_value_in_base_units < 0 ? 'text-destructive' : 'text-success'
-                      }`}
+                      className={cn(
+                        'text-lg font-semibold tracking-tight',
+                        tx.amount_value_in_base_units < 0
+                          ? 'text-rose-200'
+                          : 'text-emerald-200'
+                      )}
                     >
                       {tx.amount_value_in_base_units < 0 ? '-' : '+'}
                       {formatCurrency(Math.abs(tx.amount_value_in_base_units))}
                     </p>
-                    <p className="text-xs text-muted-foreground capitalize mt-1">
-                      {tx.status.toLowerCase()}
-                    </p>
+                    <div className="mt-2 flex justify-end">
+                      <Badge className="border-white/15 bg-white/10 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                        {tx.status.toLowerCase()}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -234,26 +258,30 @@ export function TransactionList({ transactions, accounts, categories }: Transact
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-6 pt-0 flex items-center justify-between">
-            <button
+          <div className="flex items-center justify-between gap-4 border-t border-white/10 px-6 py-4">
+            <Button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
+              variant="outline"
+              size="sm"
+              className="border-white/15 bg-background/60 text-sm text-muted-foreground/80 hover:bg-white/10"
             >
               Previous
-            </button>
+            </Button>
 
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground/70">
               Page {currentPage} of {totalPages}
             </span>
 
-            <button
+            <Button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted"
+              variant="outline"
+              size="sm"
+              className="border-white/15 bg-background/60 text-sm text-muted-foreground/80 hover:bg-white/10"
             >
               Next
-            </button>
+            </Button>
           </div>
         )}
       </div>

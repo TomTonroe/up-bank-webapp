@@ -1,26 +1,26 @@
 // Chart color palette for consistent styling across all visualizations
 
 export const CHART_COLORS = {
-  // Primary financial colors
-  income: '#10b981',      // green-500
-  expenses: '#ef4444',    // red-500
-  balance: '#3b82f6',     // blue-500
-  neutral: '#6b7280',     // gray-500
+  // Primary financial colors tuned for the iridescent dark palette
+  income: '#5EEAD4',      // teal glow
+  expenses: '#FB7185',    // rose glow
+  balance: '#818CF8',     // indigo glow
+  neutral: '#94A3B8',     // slate accent
 
-  // Category colors (diverse palette with good contrast)
+  // Category colors (harmonised spectrum for modern dark UI)
   categories: [
-    '#f59e0b', // amber-500
-    '#8b5cf6', // violet-500
-    '#ec4899', // pink-500
-    '#14b8a6', // teal-500
-    '#f97316', // orange-500
-    '#06b6d4', // cyan-500
-    '#84cc16', // lime-500
-    '#a855f7', // purple-500
-    '#f43f5e', // rose-500
-    '#22c55e', // green-500
-    '#eab308', // yellow-500
-    '#0ea5e9', // sky-500
+    '#A78BFA', // soft violet
+    '#38BDF8', // sky teal
+    '#F472B6', // pink highlight
+    '#34D399', // mint
+    '#FBBF24', // amber
+    '#22D3EE', // cyan
+    '#C084FC', // electric purple
+    '#F97316', // warm orange
+    '#F87171', // muted red
+    '#4ADE80', // soft green
+    '#F9A8D4', // blush
+    '#60A5FA', // crystal blue
   ],
 };
 
